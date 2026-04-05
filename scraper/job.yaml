@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tiktok-scraper
+  namespace: scraper
+spec:
+  completions: 5
+  parallelism: 2
+  completionMode: Indexed
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: scraper
+        image: localhost:5000/tiktok-scraper:latest
+        env:
+        - name: NODE_INDEX
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['batch.kubernetes.io/job-completion-index']
+        - name: TOTAL_NODES
+          value: "5"
+        volumeMounts:
+        - name: links
+          mountPath: /data/links.txt
+          subPath: links.txt
+        - name: output
+          mountPath: /data/output
+        - name: rclone-config
+          mountPath: /root/.config/rclone/
+          readOnly: true
+      volumes:
+      - name: links
+        configMap:
+          name: links
+      - name: output
+        hostPath:
+          path: /workspaces/super-duper-enigma/scraper/output
+          type: DirectoryOrCreate
+      - name: rclone-config
+        secret:
+          secretName: rclone-config
