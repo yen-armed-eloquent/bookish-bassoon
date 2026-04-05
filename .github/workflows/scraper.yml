@@ -24,21 +24,23 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r scraper/requirements.txt [cite: 5]
+          pip install -r scraper/requirements.txt
 
       - name: Install Rclone
-        [cite_start]run: curl https://rclone.org/install.sh | sudo bash [cite: 2]
+        run: curl https://rclone.org/install.sh | sudo bash
 
       - name: Configure Rclone
-        # Secret ko seedha /tmp/ folder mein daalna
+        # Heredoc method multiline secret ko sahi se handle karta hai
         run: |
-          echo "${{ secrets.RCLONE_CONFIG }}" > /tmp/rclone.conf
+          cat <<EOF > /tmp/rclone.conf
+          ${{ secrets.RCLONE_CONFIG }}
+          EOF
 
       - name: Run Scraper
         env:
           NODE_INDEX: ${{ matrix.node }}
           TOTAL_NODES: 5
-          [cite_start]LINKS_FILE: "scraper/links.txt" [cite: 4]
+          LINKS_FILE: "scraper/links.txt"
           OUTPUT_DIR: "output"
         run: |
           mkdir -p output
