@@ -23,18 +23,26 @@ jobs:
           python-version: '3.11'
 
       - name: Install Dependencies
-        run: |
-          pip install -r scraper/requirements.txt
+        run: pip install -r scraper/requirements.txt
 
       - name: Install Rclone
         run: curl https://rclone.org/install.sh | sudo bash
 
       - name: Configure Rclone
-        # Heredoc method multiline secret ko sahi se handle karta hai
+        shell: bash
+        env:
+          MY_RCLONE_CONFIG: ${{ secrets.RCLONE_CONFIG }}
         run: |
-          cat <<EOF > /tmp/rclone.conf
-          ${{ secrets.RCLONE_CONFIG }}
-          EOF
+          # Purani kisi bhi config ko saaf karna taake script confuse na ho
+          sudo rm -rf /root/.config/rclone/
+          mkdir -p /home/runner/.config/rclone/
+          
+          # Secret ko sahi format mein file mein likhna
+          printf "%s\n" "$MY_RCLONE_CONFIG" > /tmp/rclone.conf
+          
+          # Is file ko root ke path par bhi copy kar dein taake scraper.py ko mil jaye
+          sudo mkdir -p /root/.config/rclone/
+          sudo cp /tmp/rclone.conf /root/.config/rclone/rclone.conf
 
       - name: Run Scraper
         env:
