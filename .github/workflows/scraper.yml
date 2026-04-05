@@ -2,17 +2,17 @@ name: TikTok Scraper Pipeline
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # Har 6 ghante baad chalega
-  workflow_dispatch:      # Manual run karne ke liye
+    - cron: '0 */6 * * *' # Har 6 ghante baad automation ke liye
+  workflow_dispatch:      # Manual button se chalane ke liye
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
     strategy:
-      # Job.yaml mein completions 5 tha, isliye yahan 0 se 4 tak matrix hai
+      # 5 nodes parallel mein chalenge (0 se 4)
       matrix:
         node: [0, 1, 2, 3, 4]
-      fail-fast: false
+      fail-fast: false # Agar ek node fail ho to baaki rukna nahi chahiye
 
     steps:
       - name: Checkout Code
@@ -21,27 +21,30 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          [cite_start]python-version: '3.11' # Dockerfile ke mutabiq [cite: 1]
 
       - name: Install Dependencies
         run: |
-          pip install -r requirements.txt [cite: 5]
-          # Rclone install karna
-          curl https://rclone.org/install.sh | sudo bash [cite: 2]
+          pip install -r requirements.txt # httpx aur loguru install karega 
+
+      - name: Install Rclone
+        run: curl https://rclone.org/install.sh | sudo bash
 
       - name: Configure Rclone
         run: |
+          # Secret se config create karna
           mkdir -p /home/runner/.config/rclone/
           echo "${{ secrets.RCLONE_CONFIG_BASE64 }}" | base64 -d > /home/runner/.config/rclone/rclone.conf
-          # Scraper script /root/.config/rclone/ dhoondta hai, isliye symlink banate hain [cite: 3]
+          
+          # Script /root/.config/rclone/ check karta hai isliye wahan copy karna 
           sudo mkdir -p /root/.config/rclone/
           sudo cp /home/runner/.config/rclone/rclone.conf /root/.config/rclone/rclone.conf
 
       - name: Run Scraper
         env:
-          NODE_INDEX: ${{ matrix.node }}
+          [cite_start]NODE_INDEX: ${{ matrix.node }} # Matrix se index uthayega 
           TOTAL_NODES: 5
-          [cite_start]LINKS_FILE: "links.txt" [cite: 4]
+          LINKS_FILE: "links.txt"
           OUTPUT_DIR: "output"
         run: |
           mkdir -p output
