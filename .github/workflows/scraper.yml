@@ -24,27 +24,23 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          # Path update ki gayi hai: scraper/requirements.txt
           pip install -r scraper/requirements.txt
 
       - name: Install Rclone
         run: curl https://rclone.org/install.sh | sudo bash
 
       - name: Configure Rclone
+        # Yahan hum plain text secret ko seedha root mein dal rahe hain
         run: |
-          mkdir -p /home/runner/.config/rclone/
-          echo "${{ secrets.RCLONE_CONFIG_BASE64 }}" | base64 -d > /home/runner/.config/rclone/rclone.conf
           sudo mkdir -p /root/.config/rclone/
-          sudo cp /home/runner/.config/rclone/rclone.conf /root/.config/rclone/rclone.conf
+          echo "${{ secrets.RCLONE_CONFIG }}" | sudo tee /root/.config/rclone/rclone.conf > /dev/null
 
       - name: Run Scraper
         env:
           NODE_INDEX: ${{ matrix.node }}
           TOTAL_NODES: 5
-          # Links file ki path update ki: scraper/links.txt
           LINKS_FILE: "scraper/links.txt"
           OUTPUT_DIR: "output"
         run: |
           mkdir -p output
-          # Script ki path update ki: scraper/scraper.py
           python scraper/scraper.py
