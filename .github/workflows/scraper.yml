@@ -29,20 +29,16 @@ jobs:
         run: curl https://rclone.org/install.sh | sudo bash
 
       - name: Configure Rclone
-        shell: bash
-        env:
-          MY_RCLONE_CONFIG: ${{ secrets.RCLONE_CONFIG }}
         run: |
-          # Purani kisi bhi config ko saaf karna taake script confuse na ho
-          sudo rm -rf /root/.config/rclone/
-          mkdir -p /home/runner/.config/rclone/
+          # 1. Direct command se remote create karna (Aapke terminal log ke mutabiq)
+          rclone config create vfx mega user "enragedoatmeal6@sharebot.net" pass "pSA-V5KmqyBGeFat2G-EMcU3wNLIGW2sKpTibQ"
           
-          # Secret ko sahi format mein file mein likhna
-          printf "%s\n" "$MY_RCLONE_CONFIG" > /tmp/rclone.conf
-          
-          # Is file ko root ke path par bhi copy kar dein taake scraper.py ko mil jaye
+          # 2. Config file ko script ki expected locations par copy karna
+          mkdir -p /tmp/
+          cp ~/.config/rclone/rclone.conf /tmp/rclone.conf
           sudo mkdir -p /root/.config/rclone/
-          sudo cp /tmp/rclone.conf /root/.config/rclone/rclone.conf
+          sudo cp ~/.config/rclone/rclone.conf /root/.config/rclone/rclone.conf
+          echo "✅ Remote 'vfx' created and config files placed."
 
       - name: Run Scraper
         env:
