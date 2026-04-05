@@ -24,22 +24,21 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r scraper/requirements.txt
+          pip install -r scraper/requirements.txt [cite: 5]
 
       - name: Install Rclone
-        run: curl https://rclone.org/install.sh | sudo bash
+        [cite_start]run: curl https://rclone.org/install.sh | sudo bash [cite: 2]
 
       - name: Configure Rclone
-        # Yahan hum plain text secret ko seedha root mein dal rahe hain
+        # Secret ko seedha /tmp/ folder mein daalna
         run: |
-          sudo mkdir -p /root/.config/rclone/
-          echo "${{ secrets.RCLONE_CONFIG }}" | sudo tee /root/.config/rclone/rclone.conf > /dev/null
+          echo "${{ secrets.RCLONE_CONFIG }}" > /tmp/rclone.conf
 
       - name: Run Scraper
         env:
           NODE_INDEX: ${{ matrix.node }}
           TOTAL_NODES: 5
-          LINKS_FILE: "scraper/links.txt"
+          [cite_start]LINKS_FILE: "scraper/links.txt" [cite: 4]
           OUTPUT_DIR: "output"
         run: |
           mkdir -p output
