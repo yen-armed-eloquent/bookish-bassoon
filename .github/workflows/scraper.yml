@@ -20,31 +20,35 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          [cite_start]python-version: '3.11' # Dockerfile base image ke mutabiq [cite: 1]
 
       - name: Install Dependencies
-        run: pip install -r scraper/requirements.txt
+        run: |
+          # httpx aur loguru requirements file se install honge [cite: 5]
+          pip install -r scraper/requirements.txt 
 
       - name: Install Rclone
-        run: curl https://rclone.org/install.sh | sudo bash
+        [cite_start]run: curl https://rclone.org/install.sh | sudo bash # [cite: 1, 2]
 
-      - name: Configure Rclone
+      - name: Configure Rclone Securly
+        env:
+          M_USER: ${{ secrets.MEGA_USER }}
+          M_PASS: ${{ secrets.MEGA_PASS }}
         run: |
-          # 1. Direct command se remote create karna (Aapke terminal log ke mutabiq)
-          rclone config create vfx mega user "enragedoatmeal6@sharebot.net" pass "pSA-V5KmqyBGeFat2G-EMcU3wNLIGW2sKpTibQ"
+          # Rclone config commands secrets use karengi
+          rclone config create vfx mega user "$M_USER" pass "$M_PASS"
           
-          # 2. Config file ko script ki expected locations par copy karna
+          # Scraper script ki requirements ke liye config copy karna [cite: 3]
           mkdir -p /tmp/
           cp ~/.config/rclone/rclone.conf /tmp/rclone.conf
           sudo mkdir -p /root/.config/rclone/
           sudo cp ~/.config/rclone/rclone.conf /root/.config/rclone/rclone.conf
-          echo "✅ Remote 'vfx' created and config files placed."
 
       - name: Run Scraper
         env:
           NODE_INDEX: ${{ matrix.node }}
           TOTAL_NODES: 5
-          LINKS_FILE: "scraper/links.txt"
+          [cite_start]LINKS_FILE: "scraper/links.txt" # [cite: 4]
           OUTPUT_DIR: "output"
         run: |
           mkdir -p output
