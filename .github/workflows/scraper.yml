@@ -20,25 +20,20 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          [cite_start]python-version: '3.11' # Dockerfile base image ke mutabiq [cite: 1]
+          python-version: '3.11'
 
       - name: Install Dependencies
-        run: |
-          # httpx aur loguru requirements file se install honge [cite: 5]
-          pip install -r scraper/requirements.txt 
+        run: pip install -r scraper/requirements.txt
 
       - name: Install Rclone
-        [cite_start]run: curl https://rclone.org/install.sh | sudo bash # [cite: 1, 2]
+        run: curl https://rclone.org/install.sh | sudo bash
 
-      - name: Configure Rclone Securly
+      - name: Configure Rclone
         env:
           M_USER: ${{ secrets.MEGA_USER }}
           M_PASS: ${{ secrets.MEGA_PASS }}
         run: |
-          # Rclone config commands secrets use karengi
           rclone config create vfx mega user "$M_USER" pass "$M_PASS"
-          
-          # Scraper script ki requirements ke liye config copy karna [cite: 3]
           mkdir -p /tmp/
           cp ~/.config/rclone/rclone.conf /tmp/rclone.conf
           sudo mkdir -p /root/.config/rclone/
@@ -48,7 +43,7 @@ jobs:
         env:
           NODE_INDEX: ${{ matrix.node }}
           TOTAL_NODES: 5
-          [cite_start]LINKS_FILE: "scraper/links.txt" # [cite: 4]
+          LINKS_FILE: "scraper/links.txt"
           OUTPUT_DIR: "output"
         run: |
           mkdir -p output
